@@ -1,0 +1,110 @@
+using System;
+using System.Windows.Forms;
+using System.IO;
+using System.Xml.Linq;
+using System.Xml.Schema;
+// above is what tools we are using for this project
+
+// replace 'enterfilepathhere' with an actual file path to make this program work for your needs
+
+namespace XMLValidationWindowsForm
+{
+    public partial class XMLForm : Form
+    {
+        public XMLForm()
+        {
+            InitializeComponent();
+        }
+
+        // the add an XML document dialog item
+        OpenFileDialog ofd = new OpenFileDialog();
+
+        // the add an XSD document dialog item
+        OpenFileDialog ofdXSD = new OpenFileDialog();
+        
+        // below is what happens when the user clicks the Select an XML file button
+         private void BtnBrowse_Click(object sender, EventArgs e)
+        {
+            ofd.Filter = "XML|*.xml";
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+
+                // copy the file that the user selects to the destination folder as XMLFile.xml
+                File.Copy(ofd.FileName, @"\\enterfilepathhere\XMLFile.xml", true);
+
+                // put a successful upload message in the text box
+                TxtFileName.Text = ofd.SafeFileName + " uploaded";
+            }
+        }
+
+        // below is what happens when the user clicks the Select an XSD file button
+        private void BtnXSDBrowse_Click(object sender, EventArgs e)
+        {
+            ofdXSD.Filter = "XSD|*.xsd";
+
+            if (ofdXSD.ShowDialog() == DialogResult.OK)
+            {
+
+                // copy the file that the user selects to the destination folder as XSDFile.xsd
+                File.Copy(ofdXSD.FileName, @"\\enterfilepathhere\XSDFile.xsd", true);
+
+                // put a successful upload message in the text box
+                TxtXSDFileName.Text = ofdXSD.SafeFileName + " uploaded";
+            }
+        }
+
+        private void BtnValidate_Click(object sender, EventArgs e)
+        {
+            // add the XSDFile as a schema
+            XmlSchemaSet schema = new XmlSchemaSet();
+            schema.Add("", @"\\enterfilepathhere\XSDFile.xsd");
+
+            // add the XML document
+            XDocument doc = XDocument.Load(@"\\enterfilepathhere\XMLFile.xml");
+
+            // assume no errors, we will check for this later
+            bool validationErrors = false;
+
+            doc.Validate(schema, (s, ValidationEventArgs) =>
+            {
+                // put any error messages into the Results box
+                TxtReadOut.Text = (ValidationEventArgs.Message);
+                validationErrors = true;
+
+            });
+
+            if (validationErrors)
+            {
+                // if validation failed, flagged it as such
+                TxtStatus.Text = "Validation failed";
+            }
+            else
+            {
+                // if validation passed, "successful" in the text box
+                TxtStatus.Text = "Validation successful";
+
+                // include this in the results text box...
+                TxtReadOut.Text = "No errors found.";
+            }
+
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void XMLForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+
+    }
+}
